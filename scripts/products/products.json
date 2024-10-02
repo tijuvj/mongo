@@ -1,0 +1,22 @@
+{
+  "_id": 1,
+  "product_name": "Product A",
+  "definitions": [
+    {
+      "definition_name": "Definition 1",
+      "deleted": false,
+      "tasks": [
+        { "task_name": "Task 1", "dueDate": ISODate("2024-12-01"), "terminate": false },
+        { "task_name": "Task 2", "dueDate": ISODate("2024-10-01"), "terminate": true }
+      ]
+    },
+    {
+      "definition_name": "Definition 2",
+      "deleted": false,
+      "tasks": [
+        { "task_name": "Task 3", "dueDate": ISODate("2024-10-15"), "terminate": false },
+        { "task_name": "Task 4", "dueDate": ISODate("2024-11-01"), "terminate": false }
+      ]
+    }
+  ]
+}

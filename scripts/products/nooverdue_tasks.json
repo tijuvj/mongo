@@ -1,0 +1,47 @@
+Query: Match Products Where
+  All tasks are not overdue and not terminated.
+  All definitions are not marked as deleted.
+
+db.collection.aggregate([
+  {
+    "$match": {
+      "$expr": {
+        "$and": [
+          {
+            "$eq": [
+              { "$size": "$definitions" },
+              { "$size": {
+                "$filter": {
+                  "input": "$definitions",
+                  "as": "definition",
+                  "cond": {
+                    "$and": [
+                      { "$eq": ["$$definition.deleted", false] },  // Check for not deleted definitions
+                      { "$eq": [
+                        { "$size": "$$definition.tasks" },
+                        { "$size": {
+                          "$filter": {
+                            "input": "$$definition.tasks",
+                            "as": "task",
+                            "cond": {
+                              "$and": [
+                                { "$gte": ["$$task.dueDate", new Date()] },  // Task not overdue
+                                { "$eq": ["$$task.terminate", false] }  // Task not terminated
+                              ]
+                            }
+                          }
+                        }}
+                      ]
+                      }
+                    ]
+                  }
+                }
+              }
+              ]
+              ]
+              }
+            ]
+          }
+        }
+        }
+        ])

@@ -1,0 +1,47 @@
+Query: Match Products Where
+  All Tasks Are Terminated and Each Terminated Task Has a Reason
+
+You can use $filter and $size in an aggregation pipeline to ensure that:
+  All tasks are terminated (terminate: true).
+  Each terminated task has a non-empty terminatedReason
+
+db.collection.aggregate([
+  {
+    "$match": {
+      "$expr": {
+        "$and": [
+          {
+            "$eq": [
+              { "$size": "$definitions" },
+              { "$size": {
+                "$filter": {
+                  "input": "$definitions",
+                  "as": "definition",
+                  "cond": {
+                    "$eq": [
+                      { "$size": "$$definition.tasks" },
+                      { "$size": {
+                        "$filter": {
+                          "input": "$$definition.tasks",
+                          "as": "task",
+                          "cond": {
+                            "$and": [
+                              { "$eq": ["$$task.terminate", true] },  // Task must be terminated
+                              { "$exists": ["$$task.terminatedReason", true] },  // terminatedReason must exist
+                              { "$ne": ["$$task.terminatedReason", ""] }  // terminatedReason must not be empty
+                            ]
+                          }
+                        }
+                      }}
+                    ]
+                  }
+                }
+              }
+                ]
+              ]
+              }
+            ]
+          }
+        }
+        }
+        ])
