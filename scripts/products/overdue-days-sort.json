@@ -1,0 +1,71 @@
+[
+    {
+      $addFields: {
+        mostDueTask: {
+          $reduce: {
+            input: {
+              $map: {
+                input: "$definitions",
+                as: "definition",
+                in: {
+                  $reduce: {
+                    input: "$$definition.tasks",
+                    initialValue: { dueDate: null, daysFromToday: null, task: null },
+                    in: {
+                      $cond: [
+                        {
+                          $or: [
+                            { $eq: ["$$value.dueDate", null] },
+                            {
+                              $lt: [
+                                { $dateDiff: { startDate: "$$NOW", endDate: "$$this.dueDate", unit: "day" } },
+                                { $dateDiff: { startDate: "$$NOW", endDate: "$$value.dueDate", unit: "day" } }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          dueDate: "$$this.dueDate",
+                          daysFromToday: { $dateDiff: { startDate: "$$NOW", endDate: "$$this.dueDate", unit: "day" } },
+                          task: "$$this"
+                        },
+                        "$$value"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            initialValue: { dueDate: null, daysFromToday: null, task: null },
+            in: {
+              $cond: [
+                {
+                  $or: [
+                    { $eq: ["$$value.dueDate", null] },
+                    {
+                      $lt: ["$$this.daysFromToday", "$$value.daysFromToday"]
+                    }
+                  ]
+                },
+                "$$this",
+                "$$value"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        productName: 1, // Include any other fields you need
+        mostDueTask: "$mostDueTask.task",
+        daysFromToday: "$mostDueTask.daysFromToday"
+      }
+    },
+    {
+      $sort: {
+        daysFromToday: 1
+      }
+    }
+  ]
+  
